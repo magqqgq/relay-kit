@@ -61,6 +61,9 @@ jobs:
         if: steps.diff-check.outputs.skip != 'true'
         id: drift-check
         uses: anthropics/claude-code-action@1298632ce7736903d02a1435002705aa2a594a6c # v1
+        env:
+          # Ensure GitHub CLI can authenticate when Claude runs 'gh pr view'
+          GH_TOKEN: ${{ github.token }}
         with:
           github_token: ${{ github.token }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -105,8 +108,7 @@ jobs:
             ## Step 1: Understand what changed
 
             1. `gh pr view ${{ github.event.pull_request.number }} --json title,body,author,files` to get PR metadata.
-            2. `git diff origin/${{ github.event.pull_request.base.ref }}...HEAD` to see changes.
-            3. `git log --oneline origin/${{ github.event.pull_request.base.ref }}..HEAD` for commits.
+            2. `git diff origin/${{ github.event.pull_request.base.ref }}...HEAD` to see changes.             3. `git log --oneline origin/${{ github.event.pull_request.base.ref }}..HEAD` for commits.
             4. Read the changed files in full where needed to understand the semantic change — not just the diff hunks.
 
             ### Doc-relevant surfaces in THIS repo
@@ -124,9 +126,7 @@ jobs:
 
             ## Step 2: Load the docs context
 
-            The docs repo has been cloned read-only to `${{ env.DOCS_REPO_PATH }}`.
-
-            1. Read `${{ env.DOCS_REPO_PATH }}/CLAUDE.md` — this is the **codified style guide**. Every draft MUST conform to it (frontmatter, heading levels, voice, MDX components, tables, cross-refs).
+            The docs repo has been cloned read-only to `${{ env.DOCS_REPO_PATH }}`.              1. Read `${{ env.DOCS_REPO_PATH }}/CLAUDE.md` — this is the **codified style guide**. Every draft MUST conform to it (frontmatter, heading levels, voice, MDX components, tables, cross-refs).
             2. Use `Glob` within the docs repo under the paths `references/relay-kit/**` to find pages that plausibly relate to what this PR changes.
             3. `Read` the specific pages you believe are affected, in full. Do not skim.
             4. If the PR introduces something entirely new (new SDK action, new API endpoint, new feature, new supported chain, etc.), find the closest sibling page in the same folder and use it as a structural template.
